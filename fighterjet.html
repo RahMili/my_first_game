@@ -1,0 +1,169 @@
+<!DOCTYPE.html>
+<html>
+<canvas id='World' width='1000' height='700'></canvas>
+<script>
+	
+	var planeheight = 100;
+	var planewidth = 150;
+	var plane1 = new Image();
+	var plane2 = new Image();
+	var bg = new Image();
+	var sky = new Image();
+	var cvs = document.getElementById("World");
+	var ctx = cvs.getContext("2d");
+	var i=0;
+	var gameover;
+	var f=1;
+	var reset = 0;
+	var plane1Y = 410;
+	var plane1X = 60;
+	var plane2X = cvs.width;
+	var plane2Y = 450;
+	var speed=10;
+	var gameover=0;
+	var launch = 0;
+	var missileX;
+	var hits = 0;
+	var missilespeed = 10;
+	var missile = new Image();
+	missile.src = 'missile.PNG';
+	sky.src = 'sky.JPG';
+	plane1.src = 'fighterjet2.PNG';
+	plane2.src = 'fighterjet.PNG';
+	bg.src = 'background.jpg';
+	
+	function calculatemousepos(evt) {
+		var rect = cvs.getBoundingClientRect();
+		var root = document.documentElement;
+		var mouseX = evt.clientX - rect.left - root.scrollLeft;
+		var mouseY = evt.clientY - rect.top - root.scrollTop;
+		return {
+			x:mouseX,
+			y:mouseY
+		}
+	}
+	
+	function mouseclick(evt) {
+			reset = 0;
+			i=0;
+			f=1;
+			plane1X=60;
+			plane1Y=410;
+			plane2X=cvs.width;
+			speed = 10;
+			gaveover=0;
+			draw();
+	}
+
+	cvs.addEventListener('mousedown', mouseclick);
+	cvs.addEventListener('mousemove', 
+			function(evt) {
+				var mousePos = calculatemousepos(evt);
+				plane1Y = mousePos.y - (planeheight/2);
+				plane1X = mousePos.x - 50;
+			});
+		
+	document.onkeydown = move;
+
+	function move(e) {
+		e = e || window.event;
+
+    	/*if (e.keyCode == '38') {
+        	// up arrow
+        	plane1Y -= 10;
+    	}
+    	else if (e.keyCode == '40') {
+        	// down arrow
+        	plane1Y += 10;
+    	}
+    	else if (e.keyCode == '37') {
+    	    // left arrow
+    	    plane1X -= 10;
+    	}*/
+    	if (e.keyCode == '39') {
+       		// right arrow
+       		missileX = plane1X;
+       		missileY = plane1Y;
+       		launch=1;
+    	}
+	}
+
+	function draw() {
+		ctx.drawImage(bg, 0, 0, cvs.width, cvs.height);
+		ctx.font = 'bold 14pt Calibri';
+		ctx.fillStyle = 'black';
+		ctx.fillText ('Score', 715, 30);
+		ctx.font = 'bold 20pt Calibri';
+		ctx.fillStyle = 'black';
+		ctx.fillText (i, 720, 50);
+		ctx.font = 'bold 14pt Calibri';
+		ctx.fillStyle = 'black';
+		ctx.fillText ('Hit Bonus', 620, 30);
+		ctx.font = 'bold 20pt Calibri';
+		ctx.fillStyle = 'black';
+		ctx.fillText (hits, 650, 50);
+		/*if (missileX > cvs.width) {
+			launch =0;
+		}*/
+		if (missileX+50 >= plane2X && missileX<=plane2X+planewidth) {
+			if (missileY>=plane2Y && missileY<=plane2Y+planeheight || missileY+10>=plane2Y && missileY+10<=plane2Y+planeheight) {
+				hits += 1;
+				plane2X=-200;
+				missileX = cvs.width;
+			}
+		}
+		if (plane1X+planewidth >= plane2X && plane1X<=plane2X+planewidth) {
+			if (plane1Y>=plane2Y && plane1Y<=plane2Y+planeheight || plane1Y+planeheight>=plane2Y && plane1Y+planeheight<=plane2Y+planeheight) {
+				reset=1;
+			}
+		}
+		if (launch == 1) {
+			ctx.drawImage(missile, missileX, missileY, 50, 10);
+		}
+		if (reset == 1) {
+			//ctx.drawImage(sky, 0, 0, cvs.width, cvs.height);
+			ctx.drawImage(bg, 0, 0, cvs.width, cvs.height);
+			ctx.font = 'bold 40pt Calibri';
+			gameover=1;
+			ctx.fillText ('You crashed!', 350, 250);
+			ctx.fillText (i, 450, 400);
+			ctx.fillText ('Click mouse to RESTART!', 200, 500);
+			hits = 0;
+			i=0;
+			/*setTimeout(function() {}, 10);
+			reset=0;
+			i=0; f=1;*/
+			return;
+		}
+		ctx.drawImage(plane1, plane1X, plane1Y, planewidth, planeheight);
+		ctx.drawImage(plane2, plane2X, plane2Y, planewidth, planeheight);
+		
+		if (i > (f*500)) {
+			f++;
+			speed += 2;
+		}
+		if (plane2X < -100) {
+			plane2X = cvs.width;
+			plane2Y =100*(i%5);
+		}
+
+		if (plane1X > 600) {
+			plane2X-=(speed+3);
+		}
+		else if (plane1X > 400) {
+			plane2X-=(speed + 2);
+		}
+		else {
+			plane2X-= speed;	
+		}
+		missileX += missilespeed;
+	
+		i++;
+		requestAnimationFrame(draw);
+	}
+	draw();
+
+</script>
+</html>
+
+
